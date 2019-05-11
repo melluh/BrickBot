@@ -1,11 +1,11 @@
-package tech.mistermel.afkbot.util;
+package tech.mistermel.brickbot.util;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
 
-import tech.mistermel.afkbot.material.MaterialRegistry;
+import tech.mistermel.brickbot.material.MaterialRegistry;
 
 public class Translator {
 

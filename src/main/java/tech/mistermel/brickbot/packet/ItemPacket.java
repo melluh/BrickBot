@@ -1,4 +1,4 @@
-package tech.mistermel.afkbot.packet;
+package tech.mistermel.brickbot.packet;
 
 import java.util.List;
 
@@ -9,9 +9,9 @@ import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 import com.github.steveice10.opennbt.tag.builtin.StringTag;
 
-import tech.mistermel.afkbot.material.MaterialRegistry;
-import tech.mistermel.afkbot.util.Constants;
-import tech.mistermel.afkbot.util.Constants.Attribute;
+import tech.mistermel.brickbot.material.MaterialRegistry;
+import tech.mistermel.brickbot.util.Constants;
+import tech.mistermel.brickbot.util.Constants.Attribute;
 
 /**
  * Packet that is sent when the inventory of the

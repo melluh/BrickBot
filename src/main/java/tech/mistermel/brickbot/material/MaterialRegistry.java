@@ -1,4 +1,4 @@
-package tech.mistermel.afkbot.material;
+package tech.mistermel.brickbot.material;
 
 import java.io.BufferedReader;
 import java.io.IOException;

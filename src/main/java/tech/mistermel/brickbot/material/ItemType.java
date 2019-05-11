@@ -1,4 +1,4 @@
-package tech.mistermel.afkbot.material;
+package tech.mistermel.brickbot.material;
 
 public class ItemType extends Material {
 

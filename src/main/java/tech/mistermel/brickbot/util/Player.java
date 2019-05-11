@@ -1,9 +1,9 @@
-package tech.mistermel.afkbot.util;
+package tech.mistermel.brickbot.util;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 
-import tech.mistermel.afkbot.AFKBot;
-import tech.mistermel.afkbot.packet.LocationPacket;
+import tech.mistermel.brickbot.BrickBot;
+import tech.mistermel.brickbot.packet.LocationPacket;
 
 public class Player {
 
@@ -66,7 +66,7 @@ public class Player {
 		}
 		
 		LocationPacket packet = new LocationPacket((int) this.getX(), (int) this.getY(), (int) this.getZ(), uuid);
-		AFKBot.getInstance().getWebSocketHandler().sendPacket(packet);		
+		BrickBot.getInstance().getWebSocketHandler().sendPacket(packet);		
 		
 		this.yaw = yaw;
 		this.pitch = pitch;

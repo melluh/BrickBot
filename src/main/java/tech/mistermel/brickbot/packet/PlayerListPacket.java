@@ -1,8 +1,8 @@
-package tech.mistermel.afkbot.packet;
+package tech.mistermel.brickbot.packet;
 
 import org.json.JSONObject;
 
-import tech.mistermel.afkbot.util.Player;
+import tech.mistermel.brickbot.util.Player;
 
 public class PlayerListPacket implements Packet {
 

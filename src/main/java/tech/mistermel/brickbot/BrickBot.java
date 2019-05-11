@@ -1,4 +1,4 @@
-package tech.mistermel.afkbot;
+package tech.mistermel.brickbot;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,26 +26,26 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlaye
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 
-import tech.mistermel.afkbot.handler.BlockHandler;
-import tech.mistermel.afkbot.handler.PacketHandler;
-import tech.mistermel.afkbot.handler.WebSocketHandler;
-import tech.mistermel.afkbot.material.MaterialRegistry;
-import tech.mistermel.afkbot.packet.ChatPacket;
-import tech.mistermel.afkbot.packet.ClearItemPacket;
-import tech.mistermel.afkbot.packet.DifficultyPacket;
-import tech.mistermel.afkbot.packet.HealthPacket;
-import tech.mistermel.afkbot.packet.ItemPacket;
-import tech.mistermel.afkbot.packet.LocationPacket;
-import tech.mistermel.afkbot.util.Player;
-import tech.mistermel.afkbot.util.Translator;
+import tech.mistermel.brickbot.handler.BlockHandler;
+import tech.mistermel.brickbot.handler.PacketHandler;
+import tech.mistermel.brickbot.handler.WebSocketHandler;
+import tech.mistermel.brickbot.material.MaterialRegistry;
+import tech.mistermel.brickbot.packet.ChatPacket;
+import tech.mistermel.brickbot.packet.ClearItemPacket;
+import tech.mistermel.brickbot.packet.DifficultyPacket;
+import tech.mistermel.brickbot.packet.HealthPacket;
+import tech.mistermel.brickbot.packet.ItemPacket;
+import tech.mistermel.brickbot.packet.LocationPacket;
+import tech.mistermel.brickbot.util.Player;
+import tech.mistermel.brickbot.util.Translator;
 import tech.mistermel.core.logging.Logger;
 
-public class AFKBot {
+public class BrickBot {
 
 	public static final String LOGGER_NAME = "AFKBot";
 	public static final boolean DEBUG = true;
 
-	private static AFKBot instance;
+	private static BrickBot instance;
 
 	private String ip;
 	private int port;
@@ -71,7 +71,7 @@ public class AFKBot {
 
 	private Difficulty difficulty;
 
-	public AFKBot(String ip, int port) {
+	public BrickBot(String ip, int port) {
 		this.ip = ip;
 		this.port = port;
 		this.inventory = new ItemStack[46];
@@ -256,7 +256,7 @@ public class AFKBot {
 			String ip = json.getString("ip");
 			int port = json.getInt("port");
 			
-			instance = new AFKBot(ip, port);
+			instance = new BrickBot(ip, port);
 			instance.start(email, password);
 			
 			try {
@@ -274,7 +274,7 @@ public class AFKBot {
 		}
 	}
 
-	public static AFKBot getInstance() {
+	public static BrickBot getInstance() {
 		return instance;
 	}
 

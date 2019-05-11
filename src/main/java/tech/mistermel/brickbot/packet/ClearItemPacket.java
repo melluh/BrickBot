@@ -1,4 +1,4 @@
-package tech.mistermel.afkbot.packet;
+package tech.mistermel.brickbot.packet;
 
 import org.json.JSONObject;
 

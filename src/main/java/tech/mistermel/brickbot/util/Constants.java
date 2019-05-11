@@ -1,4 +1,4 @@
-package tech.mistermel.afkbot.util;
+package tech.mistermel.brickbot.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;

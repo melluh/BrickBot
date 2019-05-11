@@ -1,14 +1,13 @@
-package tech.mistermel.afkbot.handler;
+package tech.mistermel.brickbot.handler;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.steveice10.mc.protocol.data.game.chunk.BlockStorage;
 import com.github.steveice10.mc.protocol.data.game.chunk.Chunk;
 import com.github.steveice10.mc.protocol.data.game.chunk.Column;
 
-import tech.mistermel.afkbot.material.MaterialRegistry;
-import tech.mistermel.afkbot.world.Block;
+import tech.mistermel.brickbot.material.MaterialRegistry;
+import tech.mistermel.brickbot.world.Block;
 
 public class BlockHandler {
 

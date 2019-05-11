@@ -1,6 +1,6 @@
-package tech.mistermel.afkbot.world;
+package tech.mistermel.brickbot.world;
 
-import tech.mistermel.afkbot.material.BlockType;
+import tech.mistermel.brickbot.material.BlockType;
 
 public class Block {
 
