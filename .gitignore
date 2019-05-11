@@ -10,3 +10,6 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 /.metadata/
 config.json
+.classpath
+.project
+.settings/
