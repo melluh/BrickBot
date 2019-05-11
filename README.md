@@ -1,4 +1,4 @@
-# AFKBot
+# BrickBot
 Minecraft bot with web interface and powerful functions.
 
 ## TODO
