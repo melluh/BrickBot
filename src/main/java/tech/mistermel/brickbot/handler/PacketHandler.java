@@ -3,9 +3,12 @@ package tech.mistermel.brickbot.handler;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
+import com.github.steveice10.mc.protocol.data.game.chunk.Chunk;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
+import com.github.steveice10.mc.protocol.data.game.entity.metadata.Position;
 import com.github.steveice10.mc.protocol.data.game.world.block.BlockChangeRecord;
 import com.github.steveice10.mc.protocol.data.message.Message;
+import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerDifficultyPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
@@ -61,7 +64,11 @@ public class PacketHandler extends SessionAdapter {
 			BrickBot.getInstance().setHealth(packet.getHealth(), packet.getFood(), packet.getSaturation());
 		} else if (event.getPacket() instanceof ServerPlayerPositionRotationPacket) {
 			ServerPlayerPositionRotationPacket packet = (ServerPlayerPositionRotationPacket) event.getPacket();
-			BrickBot.getInstance().setLocation(packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch(), true);
+			
+			logger.debug("Bot pos: {0} {1} {2}", packet.getX(), packet.getY(), packet.getZ());
+			
+			BrickBot.getInstance().updateLocation(packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch(), false);
+			BrickBot.getInstance().getSession().send(new ClientPlayerPositionRotationPacket(true, packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch()));
 		} else if (event.getPacket() instanceof ServerSetSlotPacket) {
 			ServerSetSlotPacket packet = (ServerSetSlotPacket) event.getPacket();
 
@@ -154,26 +161,27 @@ public class PacketHandler extends SessionAdapter {
 			BlockChangeRecord record = packet.getRecord();
 			
 			BlockType block = MaterialRegistry.getBlock(record.getBlock().getId());
-			if(block == null) {
-				logger.warn("Unknown block with ID {0}", record.getBlock().getId());
+			if(block == null)
 				return;
-			}
 			
-			System.out.println(record.getPosition() + " ::: " + block.getName());
+			Chunk chunk = BlockHandler.getChunk(record.getPosition());
+			Position blockPos = BlockHandler.toChunkCoords(record.getPosition());
+			chunk.getBlocks().set(blockPos.getX(), blockPos.getY(), blockPos.getZ(), record.getBlock());
 		} else if (event.getPacket() instanceof ServerMultiBlockChangePacket) {
 			ServerMultiBlockChangePacket packet = (ServerMultiBlockChangePacket) event.getPacket();
+			
 			for(BlockChangeRecord record : packet.getRecords()) {
 				BlockType block = MaterialRegistry.getBlock(record.getBlock().getId());
-				if(block == null) {
-					logger.warn("Unknown block with ID {0}", record.getBlock().getId());
+				if(block == null)
 					continue;
-				}
 				
-				System.out.println(record.getPosition() + " :::: " + block.getName());
+				Chunk chunk = BlockHandler.getChunk(record.getPosition());
+				Position blockPos = BlockHandler.toChunkCoords(record.getPosition());
+				chunk.getBlocks().set(blockPos.getX(), blockPos.getY(), blockPos.getZ(), record.getBlock());
 			}
 		}
 	}
-	
+
 	@Override
 	public void connected(ConnectedEvent event) {
 		logger.info("AFKBot is ready");

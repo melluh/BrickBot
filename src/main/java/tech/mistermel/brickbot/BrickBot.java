@@ -24,6 +24,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.ClientRequestPacke
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerSwingArmPacket;
 import com.github.steveice10.packetlib.Client;
+import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 
 import tech.mistermel.brickbot.handler.BlockHandler;
@@ -101,7 +102,32 @@ public class BrickBot {
 	}
 	
 	public void fall() {
+		if(BlockHandler.getBlock(x, y - 1, z).getMaterial().getId() == 0) { // This should be adjusted to also be true for blocks that have no hitbox (e.g. signs).
+			
+		}
+	}
+	
+	public void move(double rx, double ry, double rz) {
+		int numberOfSteps = (int) (rx / 0.2);
+		System.out.println(numberOfSteps);
+		double sx = rx / numberOfSteps;
+		double sy = ry / numberOfSteps;
+		double sz = rz / numberOfSteps;
 		
+		for(int i = 0; i < numberOfSteps; i++) {
+			x += sx;
+			y += sy;
+			z += sz;
+			this.setLocation();
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		centerPosition();
 	}
 
 	public void swing() {
@@ -109,10 +135,11 @@ public class BrickBot {
 	}
 	
 	public void centerPosition() {
-		double dx = x > 0 ? Math.floor(x) + 0.5d : Math.round(x) - 0.5d;
-		double dy = Math.floor(y);
-		double dz = z > 0 ? Math.floor(z) + 0.5d : Math.round(z) - 0.5d;
-		client.getSession().send(new ClientPlayerPositionRotationPacket(false, dx, dy, dz, yaw, pitch));
+		this.x = x > 0 ? Math.floor(x) + 0.5d : Math.round(x) - 0.5d;
+		this.y = Math.floor(y);
+		this.z = z > 0 ? Math.floor(z) + 0.5d : Math.round(z) - 0.5d;
+		
+		this.setLocation();
 	}
 	
 	public Map<String, Player> getPlayerMap() {
@@ -127,8 +154,14 @@ public class BrickBot {
 
 		return null;
 	}
-
-	public void setLocation(double x, double y, double z, float yaw, float pitch, boolean relative) {
+	
+	public void setLocation() {
+		client.getSession().send(new ClientPlayerPositionRotationPacket(false, x, y, z, yaw, pitch));
+		LocationPacket packet = new LocationPacket(x, y, z);
+		webSocket.sendPacket(packet);
+	}
+	
+	public void updateLocation(double x, double y, double z, float yaw, float pitch, boolean relative) {
 		if(relative) {
 			this.x += x;
 			this.y += y;
@@ -233,6 +266,10 @@ public class BrickBot {
 	public WebSocketHandler getWebSocketHandler() {
 		return webSocket;
 	}
+	
+	public Session getSession() {
+		return client.getSession();
+	}
 
 	public GameProfile getBotProfile() {
 		return protocol.getProfile();
@@ -259,16 +296,14 @@ public class BrickBot {
 			instance = new BrickBot(ip, port);
 			instance.start(email, password);
 			
-			try {
+			/*try {
 				Thread.sleep(3000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			BlockHandler.getBlock(230, 64, -168);
-			BlockHandler.getBlock(230, 64, -167);
-			BlockHandler.getBlock(230, 64, -166);
+			instance.move(10, 0, 0);*/
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
