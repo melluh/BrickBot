@@ -1,22 +1,28 @@
 package tech.mistermel.brickbot.material;
 
-public class BlockType extends Material {
+import java.util.HashMap;
+import java.util.Map;
 
-	private double hardness;
-	private boolean diggable;	
+public class BlockType extends Material {
 	
-	public BlockType(long id, String name, String displayName, int stackSize, double hardness, boolean diggable) {
-		super(id, name, displayName, stackSize);
-		this.hardness = hardness;
-		this.diggable = diggable;
+	private boolean isDefault;
+	private Map<String, String> properties = new HashMap<String, String>();
+	
+	public BlockType(long id, String name, boolean isDefault) {
+		super(id, name);
+		this.isDefault = isDefault;
 	}
 	
-	public double getHardness() {
-		return hardness;
+	public void setProperty(String key, String value) {
+		properties.put(key, value);
 	}
 	
-	public boolean isDiggable() {
-		return diggable;
+	public String getProperty(String key) {
+		return properties.get(key);
+	}
+	
+	public boolean isDefault() {
+		return isDefault;
 	}
 
 }

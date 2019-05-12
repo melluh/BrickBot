@@ -3,14 +3,11 @@ package tech.mistermel.brickbot.material;
 public class Material {
 
 	private long id;
-	private String name, displayName;
-	private int stackSize;
+	private String name;
 	
-	public Material(long id, String name, String displayName, int stackSize) {
+	public Material(long id, String name) {
 		this.id = id;
 		this.name = name;
-		this.displayName = displayName;
-		this.stackSize = stackSize;
 	}
 	
 	public long getId() {
@@ -19,14 +16,6 @@ public class Material {
 	
 	public String getName() {
 		return name;
-	}
-	
-	public String getDisplayName() {
-		return displayName;
-	}
-	
-	public int getStackSize() {
-		return stackSize;
 	}
 	
 	public ItemType toItem() {

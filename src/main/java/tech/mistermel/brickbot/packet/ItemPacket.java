@@ -39,7 +39,7 @@ public class ItemPacket implements Packet {
 	
 	public ItemPacket(int slot, ItemStack item) {
 		this.slot = slot;
-		this.name = MaterialRegistry.getItem(item.getId()).getDisplayName();
+		this.name = MaterialRegistry.getItem(item.getId()).getName();
 		this.amount = item.getAmount();
 		this.attributes = Constants.getAttributes(item.getId());
 		

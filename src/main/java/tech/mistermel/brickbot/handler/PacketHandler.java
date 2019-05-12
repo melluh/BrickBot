@@ -8,7 +8,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.Position;
 import com.github.steveice10.mc.protocol.data.game.world.block.BlockChangeRecord;
 import com.github.steveice10.mc.protocol.data.message.Message;
-import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerDifficultyPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
@@ -64,11 +64,10 @@ public class PacketHandler extends SessionAdapter {
 			BrickBot.getInstance().setHealth(packet.getHealth(), packet.getFood(), packet.getSaturation());
 		} else if (event.getPacket() instanceof ServerPlayerPositionRotationPacket) {
 			ServerPlayerPositionRotationPacket packet = (ServerPlayerPositionRotationPacket) event.getPacket();
-			
-			logger.debug("Bot pos: {0} {1} {2}", packet.getX(), packet.getY(), packet.getZ());
-			
+
 			BrickBot.getInstance().updateLocation(packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch(), false);
-			BrickBot.getInstance().getSession().send(new ClientPlayerPositionRotationPacket(true, packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch()));
+			BrickBot.getInstance().getSession().send(new ClientTeleportConfirmPacket(packet.getTeleportId()));
+			BrickBot.getInstance().centerPosition();
 		} else if (event.getPacket() instanceof ServerSetSlotPacket) {
 			ServerSetSlotPacket packet = (ServerSetSlotPacket) event.getPacket();
 

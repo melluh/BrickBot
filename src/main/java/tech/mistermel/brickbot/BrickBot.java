@@ -1,13 +1,16 @@
 package tech.mistermel.brickbot;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 import org.json.JSONObject;
 
@@ -84,32 +87,37 @@ public class BrickBot {
 		Translator.loadTranslations();
 	}
 
-	public void start(String email, String password) {
-		try {
-			logger.info("Logging in...");
-			this.protocol = new MinecraftProtocol(email, password);
-
-			this.client = new Client(ip, port, protocol, new TcpSessionFactory(Proxy.NO_PROXY));
-			client.getSession().addListener(new PacketHandler());
-
-			webSocket.start();
-			client.getSession().connect();
-		} catch (InvalidCredentialsException e) {
-			logger.warn("Invalid credentials.");
-		} catch (RequestException e) {
-			e.printStackTrace();
+	public void start(MinecraftProtocol protocol) {
+		if(protocol == null) {
+			logger.warn("Protocol is null");
+			return;
 		}
+		this.protocol = protocol;
+
+		this.client = new Client(ip, port, protocol, new TcpSessionFactory(Proxy.NO_PROXY));
+		client.getSession().addListener(new PacketHandler());
+
+		webSocket.start();
+		client.getSession().connect();
 	}
 	
 	public void fall() {
 		if(BlockHandler.getBlock(x, y - 1, z).getMaterial().getId() == 0) { // This should be adjusted to also be true for blocks that have no hitbox (e.g. signs).
-			
+			move(0, -1, 0);
 		}
 	}
 	
 	public void move(double rx, double ry, double rz) {
-		int numberOfSteps = (int) (rx / 0.2);
-		System.out.println(numberOfSteps);
+		double c = Math.sqrt(rx * rx + rz * rz);
+        double a1 = -Math.asin(rx / c) / Math.PI * 180;
+        double a2 = Math.acos(rz / c) / Math.PI * 180;
+        if(a2 > 90) 
+        	this.yaw = (float) (180 - a1);
+        else
+        	this.yaw = (float) a1;
+		this.pitch = (float) Math.atan(ry / c);
+        
+		int numberOfSteps = (int) ((int) 4.0 * Math.floor(Math.sqrt(Math.pow(rx, 2) + Math.pow(ry, 2) + Math.pow(rz, 2))));
 		double sx = rx / numberOfSteps;
 		double sy = ry / numberOfSteps;
 		double sz = rz / numberOfSteps;
@@ -121,25 +129,28 @@ public class BrickBot {
 			this.setLocation();
 			
 			try {
-				Thread.sleep(500);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		centerPosition();
 	}
-
+	
 	public void swing() {
 		client.getSession().send(new ClientPlayerSwingArmPacket(Hand.MAIN_HAND));
 	}
 	
 	public void centerPosition() {
-		this.x = x > 0 ? Math.floor(x) + 0.5d : Math.round(x) - 0.5d;
+		this.x = x > 0 ? Math.floor(x) + 0.5d : Math.ceil(x) - 0.5d;
 		this.y = Math.floor(y);
-		this.z = z > 0 ? Math.floor(z) + 0.5d : Math.round(z) - 0.5d;
+		this.z = z > 0 ? Math.floor(z) + 0.5d : Math.ceil(z) - 0.5d;
 		
 		this.setLocation();
+	}
+	
+	public double getDistance(double x2, double y2, double z2) {
+		return Math.sqrt(Math.pow(x - x2, 2) + Math.pow(y - y2, 2) + Math.pow(z - z2, 2));
 	}
 	
 	public Map<String, Player> getPlayerMap() {
@@ -285,26 +296,69 @@ public class BrickBot {
 					System.out.println("Could not create config file");
 				return;
 			}
-			JSONObject json = new JSONObject(new String(Files.readAllBytes(Paths.get("config.json"))));
+			JSONObject config = new JSONObject(new String(Files.readAllBytes(Paths.get("config.json"))));
 			
-			String email = json.getString("email");
-			String password = json.getString("password");
+			String ip = config.getString("ip");
+			int port = config.getInt("port");
 			
-			String ip = json.getString("ip");
-			int port = json.getInt("port");
-			
-			instance = new BrickBot(ip, port);
-			instance.start(email, password);
-			
-			/*try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			MinecraftProtocol protocol = null;
+			File authFile = new File("auth.json");
+			if(!authFile.exists()) {
+				if(!authFile.createNewFile()) {
+					System.out.println("Could not create auth file. Exiting.");
+					return;
+				}
+				
+				Scanner scan = new Scanner(System.in);
+				String email;
+				while(true) {
+					System.out.println("Please enter your email address:");
+					email = scan.nextLine();
+					System.out.println("Please enter your password:");
+					String password = scan.nextLine();
+					
+					try {
+						protocol = new MinecraftProtocol(email, password);
+						break;
+					} catch (InvalidCredentialsException e) {
+						System.out.println("Invalid credentials. Please try again.");
+						break;
+					} catch (RequestException e) {
+						e.printStackTrace();
+					}
+				}
+				scan.close();
+				
+				JSONObject jsonOut = new JSONObject();
+				jsonOut.put("email", email);
+				jsonOut.put("clientToken", protocol.getClientToken());
+				jsonOut.put("accessToken", protocol.getAccessToken());
+				PrintWriter writer = new PrintWriter(new FileOutputStream(authFile));
+				writer.println(jsonOut.toString());
+				writer.close();
+			} else {
+				JSONObject auth = new JSONObject(new String(Files.readAllBytes(Paths.get("auth.json"))));
+				String email = auth.getString("email");
+				String clientToken = auth.getString("clientToken");
+				String accessToken = auth.getString("accessToken");
+				try {
+					protocol = new MinecraftProtocol(email, clientToken, accessToken);
+				} catch (InvalidCredentialsException e) {
+					System.out.println("Invalid tokens.");
+					return;
+				} catch (RequestException e) {
+					e.printStackTrace();
+				}
 			}
 			
-			instance.move(10, 0, 0);*/
+			instance = new BrickBot(ip, port);
+			instance.start(protocol);
+			
+			Thread.sleep(3000);
+			instance.move(10, 0, 20);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}

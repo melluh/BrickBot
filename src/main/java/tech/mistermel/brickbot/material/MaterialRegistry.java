@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,9 +14,8 @@ import org.json.JSONObject;
 
 public class MaterialRegistry {
 
-	public static final String BLOCKS_URL = "https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.13.2/blocks.json";
-	public static final String ITEMS_URL = "https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.13.2/items.json";
-	public static final String MATERIALS_URL = "https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.13.2/materials.json";
+	public static final String BLOCKS_URL = "https://apimon.de/mcdata/1.13.2/blocks.json";
+	public static final String ITEMS_URL = "https://apimon.de/mcdata/1.13.2/items.json";
 	
 	private static Set<Material> materials = new HashSet<Material>();
 	
@@ -27,32 +27,37 @@ public class MaterialRegistry {
 	}
 	
 	public static void loadItems() {
-		JSONArray items = new JSONArray(fetch(ITEMS_URL));
-		for(int i = 0; i < items.length(); i++) {
-			JSONObject json = items.getJSONObject(i);
-			long id = json.getLong("id");
-			String name = json.getString("name");
-			String displayName = json.getString("displayName");
-			int stackSize = json.getInt("stackSize");
+		JSONObject items = new JSONObject(fetch(ITEMS_URL));
+		for(String key : items.keySet()) {
+			JSONObject item = items.getJSONObject(key);
+			int id = item.getInt("protocol_id");
 			
-			materials.add(new ItemType(id, name, displayName, stackSize));
+			materials.add(new ItemType(id, key));
 		}
 	}
 	
 	public static void loadBlocks() {
-		JSONArray blocks = new JSONArray(fetch(BLOCKS_URL));
-		for(int i = 0; i < blocks.length(); i++) {
-			JSONObject json = blocks.getJSONObject(i);
-			long id = json.getLong("id");
-			String name = json.getString("name");
-			String displayName = json.getString("displayName");
-			int stackSize = json.getInt("stackSize");
-			double hardness = -1;
-			if(!json.isNull("hardness"))
-				hardness = json.getDouble("hardness");
-			boolean diggable = json.getBoolean("diggable");
+		JSONObject blocks = new JSONObject(fetch(BLOCKS_URL));
+		for(String key : blocks.keySet()) {
+			JSONObject block = blocks.getJSONObject(key);
+			JSONArray states = block.getJSONArray("states");
 			
-			materials.add(new BlockType(id, name, displayName, stackSize, hardness, diggable));
+			for(int i = 0; i < states.length(); i++) {
+				JSONObject state = states.getJSONObject(i);
+				int id = state.getInt("id");
+				boolean isDefault = state.has("default") ? state.getBoolean("default") : false;
+				
+				BlockType blockType = new BlockType(id, key, isDefault);
+				if(state.has("properties")) {
+					JSONObject properties = state.getJSONObject("properties");
+					
+					for(String property : properties.keySet()) {
+						blockType.setProperty(property, properties.getString(property));
+					}
+				}
+				
+				materials.add(blockType);
+			}
 		}
 	}
 	
@@ -74,7 +79,9 @@ public class MaterialRegistry {
 	
 	public static String fetch(String url) {
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
+			URLConnection conn = new URL(url).openConnection();
+			conn.setRequestProperty("User-Agent", "BrickBot/1.0");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			StringBuilder builder = new StringBuilder();
 			
 			String line;
