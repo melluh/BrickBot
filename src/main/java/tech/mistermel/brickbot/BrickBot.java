@@ -40,6 +40,7 @@ import tech.mistermel.brickbot.packet.DifficultyPacket;
 import tech.mistermel.brickbot.packet.HealthPacket;
 import tech.mistermel.brickbot.packet.ItemPacket;
 import tech.mistermel.brickbot.packet.LocationPacket;
+import tech.mistermel.brickbot.plugin.PluginHandler;
 import tech.mistermel.brickbot.util.Player;
 import tech.mistermel.brickbot.util.Translator;
 import tech.mistermel.brickbot.util.Vector3d;
@@ -59,6 +60,7 @@ public class BrickBot {
 	private Logger logger;
 	private MinecraftProtocol protocol;
 	private WebSocketHandler webSocket;
+	private PluginHandler pluginHandler;
 
 	private float health;
 	private float food;
@@ -81,7 +83,9 @@ public class BrickBot {
 
 		this.logger = Logger.createBasic(LOGGER_NAME, DEBUG);
 		this.webSocket = new WebSocketHandler();
+		this.pluginHandler = new PluginHandler(new File("plugins"));
 		
+		pluginHandler.load();
 		MaterialRegistry.load();
 		Translator.loadTranslations();
 	}
