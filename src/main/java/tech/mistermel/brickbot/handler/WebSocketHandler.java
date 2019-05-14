@@ -14,6 +14,7 @@ import tech.mistermel.brickbot.packet.Packet;
 import tech.mistermel.brickbot.packet.PlayerListPacket;
 import tech.mistermel.brickbot.packet.PlayerListPacket.PlayerListPacketAction;
 import tech.mistermel.brickbot.util.Player;
+import tech.mistermel.brickbot.util.Vector3d;
 import tech.mistermel.core.logging.Logger;
 
 public class WebSocketHandler extends WebSocketServer {
@@ -57,7 +58,8 @@ public class WebSocketHandler extends WebSocketServer {
 			this.sendPacket(playerPacket, conn);
 		}
 		
-		LocationPacket locPacket = new LocationPacket(BrickBot.getInstance().getX(), BrickBot.getInstance().getY(), BrickBot.getInstance().getZ());
+		Vector3d botPos = BrickBot.getInstance().getPosition();
+		LocationPacket locPacket = new LocationPacket(botPos.getX(), botPos.getY(), botPos.getZ());
 		this.sendPacket(locPacket);
 		
 		for(Player p : BrickBot.getInstance().getPlayers()) {

@@ -42,6 +42,7 @@ import tech.mistermel.brickbot.packet.ItemPacket;
 import tech.mistermel.brickbot.packet.LocationPacket;
 import tech.mistermel.brickbot.util.Player;
 import tech.mistermel.brickbot.util.Translator;
+import tech.mistermel.brickbot.util.Vector3d;
 import tech.mistermel.core.logging.Logger;
 
 public class BrickBot {
@@ -63,9 +64,7 @@ public class BrickBot {
 	private float food;
 	private float saturation;
 
-	private double x;
-	private double y;
-	private double z;
+	private Vector3d pos;
 	
 	private float yaw;
 	private float pitch;
@@ -102,9 +101,19 @@ public class BrickBot {
 	}
 	
 	public void fall() {
-		if(BlockHandler.getBlock(x, y - 1, z).getMaterial().getId() == 0) { // This should be adjusted to also be true for blocks that have no hitbox (e.g. signs).
+		// TODO: Also check for blocks without a hitbox
+		if(BlockHandler.getBlock(pos.getX(), pos.getY() - 1, pos.getZ()).getMaterial().getId() == 0) {
 			move(0, -1, 0);
 		}
+	}
+	
+	public void moveTo(double tx, double ty, double tz) {
+		moveTo(new Vector3d(tx, ty, tz));
+	}
+	
+	public void moveTo(Vector3d to) {
+		Vector3d v = to.clone().subtract(pos).floor();
+		this.move(v.getX(), v.getY(), v.getZ());
 	}
 	
 	public void move(double rx, double ry, double rz) {
@@ -123,9 +132,9 @@ public class BrickBot {
 		double sz = rz / numberOfSteps;
 		
 		for(int i = 0; i < numberOfSteps; i++) {
-			x += sx;
-			y += sy;
-			z += sz;
+			pos.setX(pos.getX() + sx);
+			pos.setY(pos.getY() + sy);
+			pos.setZ(pos.getZ() + sz);
 			this.setLocation();
 			
 			try {
@@ -142,15 +151,11 @@ public class BrickBot {
 	}
 	
 	public void centerPosition() {
-		this.x = x > 0 ? Math.floor(x) + 0.5d : Math.ceil(x) - 0.5d;
-		this.y = Math.floor(y);
-		this.z = z > 0 ? Math.floor(z) + 0.5d : Math.ceil(z) - 0.5d;
+		pos.setX(pos.getX() > 0 ? Math.floor(pos.getX()) + 0.5d : Math.ceil(pos.getX()) - 0.5d);
+		pos.setY(Math.floor(pos.getY()));
+		pos.setZ(pos.getZ() > 0 ? Math.floor(pos.getZ()) + 0.5d : Math.ceil(pos.getZ()) - 0.5d);
 		
 		this.setLocation();
-	}
-	
-	public double getDistance(double x2, double y2, double z2) {
-		return Math.sqrt(Math.pow(x - x2, 2) + Math.pow(y - y2, 2) + Math.pow(z - z2, 2));
 	}
 	
 	public Map<String, Player> getPlayerMap() {
@@ -167,39 +172,31 @@ public class BrickBot {
 	}
 	
 	public void setLocation() {
-		client.getSession().send(new ClientPlayerPositionRotationPacket(false, x, y, z, yaw, pitch));
-		LocationPacket packet = new LocationPacket(x, y, z);
+		client.getSession().send(new ClientPlayerPositionRotationPacket(false, pos.getX(), pos.getY(), pos.getZ(), yaw, pitch));
+		LocationPacket packet = new LocationPacket(pos.getX(), pos.getY(), pos.getZ());
 		webSocket.sendPacket(packet);
 	}
 	
 	public void updateLocation(double x, double y, double z, float yaw, float pitch, boolean relative) {
 		if(relative) {
-			this.x += x;
-			this.y += y;
-			this.z += z;
+			pos.setX(pos.getX() + x);
+			pos.setY(pos.getY() + y);
+			pos.setZ(pos.getZ() + z);
 		} else {
-			this.x = x;
-			this.y = y;
-			this.z = z;
+			pos.setX(x);
+			pos.setY(y);
+			pos.setZ(z);
 		}
 		
 		this.yaw = yaw;
 		this.pitch = pitch;
 
-		LocationPacket packet = new LocationPacket(x, y, z);
+		LocationPacket packet = new LocationPacket(pos.getX(), pos.getY(), pos.getZ());
 		webSocket.sendPacket(packet);
 	}
 
-	public double getX() {
-		return x;
-	}
-
-	public double getY() {
-		return y;
-	}
-
-	public double getZ() {
-		return z;
+	public Vector3d getPosition() {
+		return pos;
 	}
 
 	public void setDifficulty(Difficulty difficulty) {
