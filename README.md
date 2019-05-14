@@ -3,7 +3,7 @@ Minecraft bot with web interface and powerful functions.
 
 ## TODO
 - [ ] Implement basic walking functions (forward, back, strafe)
-- [ ] Implement block/chunk stuff
+- [x] Implement block/chunk stuff
 - [ ] Implement falling
 - [ ] Implement basic pathfinding
 - [ ] Implement player following pathfinding
